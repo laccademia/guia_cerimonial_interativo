@@ -1,0 +1,175 @@
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface PageViewerProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onModuleComplete?: (moduleId: number) => void;
+  moduleVideoUrl?: string;
+  isModuleEnd?: boolean;
+}
+
+export function PageViewer({
+  currentPage,
+  totalPages,
+  onPageChange,
+  onModuleComplete,
+  moduleVideoUrl,
+  isModuleEnd,
+}: PageViewerProps) {
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
+
+  // Reset video state when page changes
+  useEffect(() => {
+    setShowVideo(false);
+    setIsImageLoading(true);
+  }, [currentPage]);
+
+  const handlePrev = () => {
+    if (showVideo) {
+      setShowVideo(false);
+    } else if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (isModuleEnd && !showVideo && moduleVideoUrl) {
+      setShowVideo(true);
+    } else if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  // Format page number to match file naming (page-01.png, page-10.png)
+  const pageFileName = `page-${currentPage.toString().padStart(2, "0")}.png`;
+  const imagePath = `/images/pages/${pageFileName}`;
+
+  // Extract YouTube ID from URL
+  const getYoutubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  const videoId = moduleVideoUrl ? getYoutubeId(moduleVideoUrl) : null;
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full min-h-[80vh] gap-6 p-4">
+      {/* Main Content Area - Theater Mode */}
+      <div className="relative w-full max-w-5xl aspect-video bg-black/40 rounded-xl border border-primary/20 shadow-[0_0_30px_-5px_rgba(var(--primary),0.1)] overflow-hidden group">
+        
+        {/* Glow Effect Background */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-secondary/5 opacity-50 pointer-events-none" />
+
+        {showVideo && videoId ? (
+          <div className="w-full h-full animate-in fade-in duration-500">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        ) : (
+          <div className="relative w-full h-full flex items-center justify-center">
+            {isImageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+            <img
+              src={imagePath}
+              alt={`Página ${currentPage}`}
+              className={cn(
+                "max-h-full max-w-full object-contain transition-opacity duration-500",
+                isImageLoading ? "opacity-0" : "opacity-100"
+              )}
+              onLoad={() => setIsImageLoading(false)}
+            />
+          </div>
+        )}
+
+        {/* Navigation Overlay (Desktop) */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="pointer-events-auto h-16 w-16 rounded-full bg-black/50 hover:bg-primary/20 hover:text-primary backdrop-blur-sm border border-white/10 transition-all hover:scale-110"
+            onClick={handlePrev}
+            disabled={currentPage === 1 && !showVideo}
+          >
+            <ChevronLeft className="h-10 w-10" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "pointer-events-auto h-16 w-16 rounded-full bg-black/50 hover:bg-primary/20 hover:text-primary backdrop-blur-sm border border-white/10 transition-all hover:scale-110",
+              isModuleEnd && !showVideo && "bg-primary/20 text-primary animate-pulse border-primary/50"
+            )}
+            onClick={handleNext}
+            disabled={currentPage === totalPages && showVideo}
+          >
+            {isModuleEnd && !showVideo ? (
+              <Play className="h-8 w-8 ml-1" />
+            ) : (
+              <ChevronRight className="h-10 w-10" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Controls (Visible on small screens) */}
+      <div className="flex items-center justify-between w-full max-w-md md:hidden gap-4">
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary"
+          onClick={handlePrev}
+          disabled={currentPage === 1 && !showVideo}
+        >
+          <ChevronLeft className="mr-2 h-5 w-5" /> Anterior
+        </Button>
+        
+        <span className="text-muted-foreground font-mono text-sm">
+          {currentPage} / {totalPages}
+        </span>
+
+        <Button
+          variant="outline"
+          size="lg"
+          className={cn(
+            "flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary",
+            isModuleEnd && !showVideo && "border-primary bg-primary/10 text-primary"
+          )}
+          onClick={handleNext}
+          disabled={currentPage === totalPages && showVideo}
+        >
+          {isModuleEnd && !showVideo ? (
+            <>Ver Vídeo <Play className="ml-2 h-4 w-4" /></>
+          ) : (
+            <>Próximo <ChevronRight className="ml-2 h-5 w-5" /></>
+          )}
+        </Button>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="w-full max-w-5xl h-1 bg-secondary/20 rounded-full overflow-hidden mt-4">
+        <div 
+          className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+          style={{ width: `${(currentPage / totalPages) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
