@@ -58,6 +58,36 @@ export function PageViewer({
 
   const videoId = moduleVideoUrl ? getYoutubeId(moduleVideoUrl) : null;
 
+  // Botões de índice para a página 2
+  const IndexButtons = () => {
+    if (currentPage !== 2) return null;
+
+    const buttons = [
+      { id: 1, page: 3, color: "bg-blue-500", shadow: "shadow-blue-500/50", label: "Módulo 1" },
+      { id: 2, page: 6, color: "bg-green-500", shadow: "shadow-green-500/50", label: "Módulo 2" },
+      { id: 3, page: 9, color: "bg-purple-500", shadow: "shadow-purple-500/50", label: "Módulo 3" },
+      { id: 4, page: 12, color: "bg-orange-500", shadow: "shadow-orange-500/50", label: "Módulo 4" },
+    ];
+
+    return (
+      <div className="absolute inset-0 pointer-events-none flex items-end justify-center pb-[5%] md:pb-[8%] gap-[2%] md:gap-[4%] px-[10%]">
+        {buttons.map((btn) => (
+          <Button
+            key={btn.id}
+            onClick={() => onPageChange(btn.page)}
+            className={cn(
+              "pointer-events-auto flex-1 h-10 md:h-14 text-xs md:text-sm font-bold uppercase tracking-wider text-white border-none transition-all duration-300 hover:scale-105 hover:-translate-y-1",
+              btn.color,
+              `shadow-[0_0_20px_rgba(0,0,0,0.5),0_4px_0_rgba(0,0,0,0.3)] hover:${btn.shadow} hover:shadow-[0_0_30px_5px]`
+            )}
+          >
+            {btn.label}
+          </Button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-[80vh] gap-6 p-4">
       {/* Main Content Area - Theater Mode */}
@@ -95,72 +125,51 @@ export function PageViewer({
               )}
               onLoad={() => setIsImageLoading(false)}
             />
+            
+            {/* Camada de Botões do Índice (apenas página 2) */}
+            <IndexButtons />
           </div>
         )}
 
-        {/* Navigation Overlay (Desktop) */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="pointer-events-auto h-16 w-16 rounded-full bg-black/50 hover:bg-primary/20 hover:text-primary backdrop-blur-sm border border-white/10 transition-all hover:scale-110"
-            onClick={handlePrev}
-            disabled={currentPage === 1 && !showVideo}
-          >
-            <ChevronLeft className="h-10 w-10" />
-          </Button>
-
+        {/* 3D Neon Navigation Buttons (Always visible on desktop, overlay on mobile) */}
+        <div className="absolute inset-y-0 left-0 flex items-center px-2 md:px-4 pointer-events-none">
           <Button
             variant="ghost"
             size="icon"
             className={cn(
-              "pointer-events-auto h-16 w-16 rounded-full bg-black/50 hover:bg-primary/20 hover:text-primary backdrop-blur-sm border border-white/10 transition-all hover:scale-110",
-              isModuleEnd && !showVideo && "bg-primary/20 text-primary animate-pulse border-primary/50"
+              "pointer-events-auto h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 group/btn",
+              "bg-black/40 backdrop-blur-md border border-primary/30 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]",
+              "hover:bg-primary hover:text-black hover:border-primary hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] hover:scale-110",
+              "disabled:opacity-0 disabled:pointer-events-none"
+            )}
+            onClick={handlePrev}
+            disabled={currentPage === 1 && !showVideo}
+          >
+            <ChevronLeft className="h-8 w-8 md:h-10 md:w-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" />
+          </Button>
+        </div>
+
+        <div className="absolute inset-y-0 right-0 flex items-center px-2 md:px-4 pointer-events-none">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "pointer-events-auto h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 group/btn",
+              "bg-black/40 backdrop-blur-md border border-primary/30 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]",
+              "hover:bg-primary hover:text-black hover:border-primary hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] hover:scale-110",
+              isModuleEnd && !showVideo && "animate-pulse border-primary shadow-[0_0_20px_rgba(var(--primary),0.4)]",
+              "disabled:opacity-0 disabled:pointer-events-none"
             )}
             onClick={handleNext}
             disabled={currentPage === totalPages && showVideo}
           >
             {isModuleEnd && !showVideo ? (
-              <Play className="h-8 w-8 ml-1" />
+              <Play className="h-8 w-8 md:h-10 md:w-10 ml-1 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" />
             ) : (
-              <ChevronRight className="h-10 w-10" />
+              <ChevronRight className="h-8 w-8 md:h-10 md:w-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" />
             )}
           </Button>
         </div>
-      </div>
-
-      {/* Mobile Navigation Controls (Visible on small screens) */}
-      <div className="flex items-center justify-between w-full max-w-md md:hidden gap-4">
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary"
-          onClick={handlePrev}
-          disabled={currentPage === 1 && !showVideo}
-        >
-          <ChevronLeft className="mr-2 h-5 w-5" /> Anterior
-        </Button>
-        
-        <span className="text-muted-foreground font-mono text-sm">
-          {currentPage} / {totalPages}
-        </span>
-
-        <Button
-          variant="outline"
-          size="lg"
-          className={cn(
-            "flex-1 border-primary/30 hover:bg-primary/10 hover:border-primary",
-            isModuleEnd && !showVideo && "border-primary bg-primary/10 text-primary"
-          )}
-          onClick={handleNext}
-          disabled={currentPage === totalPages && showVideo}
-        >
-          {isModuleEnd && !showVideo ? (
-            <>Ver Vídeo <Play className="ml-2 h-4 w-4" /></>
-          ) : (
-            <>Próximo <ChevronRight className="ml-2 h-5 w-5" /></>
-          )}
-        </Button>
       </div>
 
       {/* Progress Indicator */}
