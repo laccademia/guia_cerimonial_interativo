@@ -61,7 +61,7 @@ export function PageViewer({
   const videoId = moduleVideoUrl ? getYoutubeId(moduleVideoUrl) : null;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[80vh] gap-6 p-4">
+    <div className="flex flex-col items-center justify-center w-full h-full max-h-screen gap-4 p-4 overflow-hidden">
       {/* Cinema Mode Overlay */}
       <div 
         className={cn(
@@ -72,7 +72,7 @@ export function PageViewer({
 
       {/* Main Content Area - Theater Mode */}
       <div className={cn(
-        "relative w-full max-w-5xl aspect-video bg-black/40 rounded-xl border border-primary/20 shadow-[0_0_30px_-5px_rgba(var(--primary),0.1)] overflow-hidden group transition-all duration-500",
+        "relative w-full max-w-5xl aspect-video max-h-[85vh] bg-black/40 rounded-xl border border-primary/20 shadow-[0_0_30px_-5px_rgba(var(--primary),0.1)] overflow-hidden group transition-all duration-500 flex-shrink-0",
         showVideo ? "z-50 scale-105 shadow-[0_0_100px_rgba(var(--primary),0.3)] border-primary/50" : "z-0"
       )}>
         
