@@ -133,6 +133,7 @@ export default function Home() {
           totalPages={TOTAL_PAGES}
           onPageChange={handlePageChange}
           moduleVideoUrl={currentModule?.videoUrl}
+          moduleTitle={currentModule?.title}
           isModuleEnd={isModuleEnd}
         />
 
