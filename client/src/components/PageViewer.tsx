@@ -49,7 +49,7 @@ export function PageViewer({
 
   // Format page number to match file naming (page-01.png, page-10.png)
   const pageFileName = `page-${currentPage.toString().padStart(2, "0")}.png`;
-  const imagePath = `/images/pages/${pageFileName}`;
+  const imagePath = `${import.meta.env.BASE_URL}images/pages/${pageFileName}`;
 
   // Extract YouTube ID from URL
   const getYoutubeId = (url: string) => {
